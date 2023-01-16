@@ -1,13 +1,14 @@
 --Mocha Modules
 
 local mochaDependencies = script.Parent:WaitForChild("mochaDependencies")
-local roact = require(mochaDependencies.Roact[".source"])
+local roact = require(mochaDependencies.Roact)
 local topBarPlus = require(mochaDependencies:WaitForChild("TopBarPlus"))
 
 --
 
 --Roblox Services
 
+local guiService = game:GetService("GuiService")
 local playerService = game:GetService("Players")
 local replicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -44,6 +45,7 @@ methods.__index = methods
 methods.uiInstanceAlive = true
 methods.currentActiveUI = nil
 methods.userColorIndex = nil
+methods.deviceMode = nil
 methods.maxLimit = 50
 
 --
@@ -57,7 +59,23 @@ function mochaChatClient.new()
     return self
 end
 
+--static methods
+
+function mochaChatClient.Roact()
+    return roact
+end
+--
+
 --methods
+
+---comment
+---@param clientChatInstance mochaChatClient
+---@return any
+function checkChatUI(clientChatInstance)
+    local isConsole = guiService:IsTenFootInterface()
+
+    if isConsole then return deviceMode.CONSOLE end
+end
 
 ---Destroys the current Chat UI
 function methods:DestroyUI()
@@ -67,9 +85,11 @@ function methods:DestroyUI()
 end
 
 ---Creates a new Chat UI
----@param uiParams table
-function methods:CreateUI(uiParams)
-    
+---@param uiData table
+function methods:CreateUI(uiData)
+    local device = checkChatUI(self)
+
+    if device == deviceMode.CONSOLE then error("User is on console, Terminating client message", 0) end
 end
 --
 
