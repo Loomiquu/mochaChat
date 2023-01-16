@@ -34,6 +34,17 @@ local deviceMode = {
     CONSOLE = 4; --This is only used to disable mochaChat on xbox
 }
 
+function deviceMode:getName(enumValue)
+    for key, v in deviceMode do
+        if type(v) ~= "number" then continue end
+        if v == enumValue then return tostring(key) end
+    end
+    return "nil"
+end
+
+function deviceMode:GetEnumItems()
+    return self
+end
 --
 
 --
@@ -68,13 +79,17 @@ end
 
 --methods
 
----comment
 ---@param clientChatInstance mochaChatClient
 ---@return any
 function checkChatUI(clientChatInstance)
     local isConsole = guiService:IsTenFootInterface()
+    local screenWidth = workspace.CurrentCamera.ViewportSize.X
+    local phoneWidth, tabletWidth = 640, 1024
 
     if isConsole then return deviceMode.CONSOLE end
+    if screenWidth <= phoneWidth then return deviceMode.PHONE end
+    if screenWidth <= tabletWidth then return deviceMode.TABLET end
+    return deviceMode.PC
 end
 
 ---Destroys the current Chat UI
@@ -87,9 +102,9 @@ end
 ---Creates a new Chat UI
 ---@param uiData table
 function methods:CreateUI(uiData)
-    local device = checkChatUI(self)
-
-    if device == deviceMode.CONSOLE then error("User is on console, Terminating client message", 0) end
+    local deviceType = checkChatUI(self)
+    print(deviceMode:getName(deviceType))
+    if deviceType == deviceMode.CONSOLE then error("User is on console, Terminating client UI", 0) end
 end
 --
 
