@@ -1,9 +1,9 @@
 --Mocha Modules
 
 local mochaDependencies = script.Parent:WaitForChild("mochaDependencies")
-local roact = require(mochaDependencies.Roact)
+local roact = require(mochaDependencies.Roact[".source"])
 local topBarPlus = require(mochaDependencies:WaitForChild("TopBarPlus"))
-
+local clientPrintStack = require(script.Parent:WaitForChild("mochaClientPrintStack"))
 --
 
 --Roblox Services
@@ -47,6 +47,32 @@ function deviceMode:GetEnumItems()
 end
 --
 
+--Defaults incase the instance is nil
+
+local defaultChatInfo = {
+    pcUiScale = UDim2.new(0.3,0,0.308,0);
+    phoneUiScale = UDim2.new(0.5,0,0.585,0);
+    tabletUiScale = UDim2.new(0.4,0,0.333,0);
+
+    ["ChatBackground"] = roact.createElement("Frame", {
+
+    }),
+    ["Chat"] = roact.createElement("ScrollingFrame", {
+
+    }),
+
+    ["ChatBoxBackground"] = roact.createElement("Frame", {
+        Size = UDim2.new(1,0,0,42);
+        Position = UDim2.new(0,0,1,-42)
+    }),
+    ["ChatBox"] = roact.createElement("TextBox", {
+
+    })
+    
+}
+
+--
+
 --
 
 --mochaChat's clientSided Class, that handles anything clientsided
@@ -56,9 +82,8 @@ methods.__index = methods
 methods.uiInstanceAlive = true
 methods.currentActiveUI = nil
 methods.userColorIndex = nil
-methods.deviceMode = nil
 methods.maxLimit = 50
-
+methods.Refs = {}
 --
 
 ---Constructor Method for mochaChatClient
@@ -92,10 +117,19 @@ function checkChatUI(clientChatInstance)
     return deviceMode.PC
 end
 
+function isValidUiData(uiData)
+
+    for uiInstance, _ in defaultChatInfo do
+        if uiData[tostring(uiInstance)] == nil then clientPrintStack.printWarnStack(600, uiInstance) return false end
+    end
+
+    return true
+end
+
 ---Destroys the current Chat UI
 function methods:DestroyUI()
     self.uiInstanceAlive = false
-    if self.currentActiveUI == nil then warn("No UI currently available, cannot destroy") return end
+    if self.currentActiveUI == nil then clientPrintStack.printWarnStack(601) return end
     roact.unmount(self.currentActiveUI)
 end
 
@@ -104,7 +138,10 @@ end
 function methods:CreateUI(uiData)
     local deviceType = checkChatUI(self)
     print(deviceMode:getName(deviceType))
-    if deviceType == deviceMode.CONSOLE then error("User is on console, Terminating client UI", 0) end
+    if deviceType == deviceMode.CONSOLE then clientPrintStack.printErrorStack(600) end
+
+    if not isValidUiData(uiData) then uiData = defaultChatInfo end
+    
 end
 --
 
@@ -117,13 +154,10 @@ function methods:SetUserColorIndex(colorModule)
     self.userColorIndex = colorModule
 end
 
-function methods:setMessageLimit(x)
-    if x == nil or x <= 0 then x = 1 end
-    methods.maxLimit = x
-end
-
-function methods:GetmessageLimit()
-    return self.maxLimit
+function methods:createUiTemplate()
+    local this = {}
+    this.__index = this
+    return setmetatable(defaultChatInfo, this)
 end
 
 function methods:GetUserColorIndex()

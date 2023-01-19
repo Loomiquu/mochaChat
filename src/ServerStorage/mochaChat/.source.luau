@@ -59,7 +59,9 @@ function mochaChat.new()
     self.Remote = createCommunicator()
     self.ActiveListeners = {}
     self = setmetatable(self, metaMethod)
-    script:FindFirstChild("mochaClientEssentials"):Clone().Parent = replicatedStorage
+    if not replicatedStorage:FindFirstChild("mochaClientEssentials") then
+        script:FindFirstChild("mochaClientEssentials"):Clone().Parent = replicatedStorage
+    end
     mochaChatSignals.init(self) --Launches the serversided part of the module
     return self
 end
