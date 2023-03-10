@@ -42,4 +42,4 @@ end
 hooks["OnPlayerChatted"] = setmetatable({}, OnPlayerChatted)
 
 
-return hooks
+return hooks 
